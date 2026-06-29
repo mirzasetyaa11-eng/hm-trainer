@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#10B981">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HM Trainer">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%2310B981'/><text x='90' y='118' text-anchor='middle' font-size='90'>🏃</text></svg>">
+<title>HM Trainer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#fafaf9;--s0:#f5f5f4;--s1:#e7e5e4;--s2:#fff;--tx:#1c1917;--tx2:#78716c;--tx3:#a8a29e;--bd:#e7e5e4;--bds:#d6d3d1;--r:10px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0a0a;--s0:#171717;--s1:#262626;--s2:#1c1c1c;--tx:#fafaf9;--tx2:#a8a29e;--tx3:#57534e;--bd:#2e2e2e;--bds:#3f3f3f}}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100dvh;padding:12px 16px env(safe-area-inset-bottom)}
+input,textarea,button,select{font-family:var(--font);font-size:14px}
+.tabs{display:flex;gap:4px;background:var(--s0);border-radius:12px;padding:4px;margin-bottom:16px}
+.tab{flex:1;padding:10px 0;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--tx3);transition:.2s}
+.tab.on{background:var(--s2);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card{background:var(--s2);border:.5px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.hero{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.hero-num{font-size:32px;font-weight:600;color:#10B981;line-height:1}
+.hero-sub{font-size:12px;color:var(--tx3);margin-top:2px}
+.phase-bar{display:flex;gap:3px;margin-bottom:10px}
+.phase-seg{height:6px;border-radius:3px;transition:.3s}
+.wk-scroll{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;scrollbar-width:none}
+.wk-scroll::-webkit-scrollbar{display:none}
+.wk-btn{flex-shrink:0;width:40px;height:40px;border-radius:12px;border:.5px solid var(--bd);background:var(--s2);font-size:13px;font-weight:400;cursor:pointer;color:var(--tx2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:.15s}
+.wk-btn.on{border-width:2px;font-weight:600}
+.day{padding:14px 16px;border-radius:14px;border:.5px solid var(--bd);background:var(--s2);margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
+.day:active{transform:scale(.98)}
+.day.done{opacity:.65}
+.chk{width:30px;height:30px;border-radius:10px;border:1.5px solid var(--bds);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.chk.on{border:none}
+.chk.rest{opacity:.3;pointer-events:none;border-style:dashed}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;opacity:0;transition:opacity .2s;display:none}
+.overlay.show{display:block;opacity:1}
+.sheet{position:fixed;bottom:0;left:0;right:0;background:var(--s2);border-radius:20px 20px 0 0;max-height:88dvh;overflow-y:auto;z-index:101;transform:translateY(100%);transition:transform .3s ease-out;scrollbar-width:none}
+.sheet::-webkit-scrollbar{display:none}
+.sheet.show{transform:translateY(0)}
+.sheet-handle{display:flex;justify-content:center;padding:10px 0 4px}
+.sheet-handle div{width:36px;height:4px;border-radius:2px;background:var(--bds)}
+.sheet-head{margin:0 16px 16px;padding:20px;border-radius:16px;position:relative}
+.zone-bar{display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.zone-seg{flex:1;transition:.3s}
+.split-row{padding:12px 16px;border-bottom:.5px solid var(--bd)}
+.split-row:last-child{border-bottom:none}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.field label{font-size:11px;color:var(--tx3);display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.field input,.field textarea{width:100%;padding:10px 12px;border-radius:10px;border:.5px solid var(--bd);background:var(--s0);font-size:14px;font-weight:500;color:var(--tx);outline:none;transition:border .2s}
+.field input:focus,.field textarea:focus{border-color:#10B981}
+.field textarea{resize:none;font-size:13px;line-height:1.5}
+.btn-ai{width:100%;padding:14px;border-radius:12px;border:none;font-size:14px;font-weight:500;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+.btn-ai:disabled{opacity:.6;cursor:wait}
+.btn-done{width:100%;padding:16px;border-radius:14px;border:none;font-size:16px;font-weight:500;cursor:pointer;transition:.2s}
+.analysis-box{margin-top:14px;padding:16px;border-radius:12px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.badge{padding:16px 14px;border-radius:14px;border:.5px solid var(--bd);background:var(--s2);text-align:center;transition:.3s}
+.badge.on{border:1.5px solid #F59E0B}
+.badge.off{opacity:.4}
+.badge .icon{font-size:32px;margin-bottom:6px}
+.badge.off .icon{filter:grayscale(1)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-card{background:var(--s2);border-radius:14px;padding:18px 16px;border:.5px solid var(--bd)}
+.stat-card .num{font-size:28px;font-weight:500}
+.stat-card .lbl{font-size:12px;color:var(--tx3);margin-top:2px}
+.vol-chart{display:flex;align-items:flex-end;gap:4px;height:100px}
+.vol-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.vol-bg{width:100%;border-radius:4px;background:var(--s0);position:relative;overflow:hidden}
+.vol-fill{position:absolute;bottom:0;width:100%;border-radius:4px;transition:height .5s}
+.toast{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:center;pointer-events:none;animation:slideDown .4s ease-out}
+.toast-inner{margin:16px;padding:14px 20px;background:var(--s2);border:2px solid #F59E0B;border-radius:16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,.2);max-width:340px;width:100%}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid var(--bds);border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}
+.upload-btn{width:100%;padding:14px;border-radius:10px;border:1.5px dashed var(--bds);background:var(--s0);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--tx2);transition:.2s}
+.upload-btn.has{border-style:solid;border-color:#10B981;color:#10B981;background:#10B98110}
+.prepost-item{padding:12px 16px;border-bottom:.5px solid var(--bd);display:flex;gap:12px;align-items:flex-start}
+.prepost-item:last-child{border-bottom:none}
+.prepost-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px}
+.ring{position:relative;width:48px;height:48px}
+.ring svg{width:48px;height:48px}
+.ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"></div>
+<div id="toast-container"></div>
+
+<script>
+const RD=new Date("2026-09-28"),MHR=198;
+const DN=["Sen","Sel","Rab","Kam","Jum","Sab","Min"],DF=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"];
+const ZD={Z1:{min:99,max:119,c:"#60A5FA"},Z2:{min:119,max:139,c:"#34D399"},Z3:{min:139,max:158,c:"#FBBF24"},Z4:{min:158,max:178,c:"#F97316"},Z5:{min:178,max:198,c:"#EF4444"}};
+const TS={
+  rest:{i:"🌙",l:"Rest Day",a:"#94A3B8",g:"linear-gradient(135deg,#F1F5F9,#E2E8F0)",d:"#475569"},
+  walkrun:{i:"🚶‍♂️",l:"Walk-Run",a:"#06B6D4",g:"linear-gradient(135deg,#CFFAFE,#A5F3FC)",d:"#0E7490"},
+  easy:{i:"🏃",l:"Easy Run",a:"#10B981",g:"linear-gradient(135deg,#D1FAE5,#A7F3D0)",d:"#059669"},
+  tempo:{i:"⚡",l:"Tempo Run",a:"#F59E0B",g:"linear-gradient(135deg,#FEF3C7,#FDE68A)",d:"#D97706"},
+  long:{i:"🏔️",l:"Long Run",a:"#8B5CF6",g:"linear-gradient(135deg,#EDE9FE,#DDD6FE)",d:"#7C3AED"},
+  interval:{i:"🔥",l:"Interval",a:"#EF4444",g:"linear-gradient(135deg,#FEE2E2,#FECACA)",d:"#DC2626"},
+  cross:{i:"💪",l:"Cross Train",a:"#6366F1",g:"linear-gradient(135deg,#E0E7FF,#C7D2FE)",d:"#4F46E5"},
+  race:{i:"🏁",l:"Race Day!",a:"#EC4899",g:"linear-gradient(135deg,#FCE7F3,#FBCFE8)",d:"#DB2777"},
+  shakeout:{i:"🍃",l:"Shakeout",a:"#22C55E",g:"linear-gradient(135deg,#DCFCE7,#BBF7D0)",d:"#16A34A"},
+};
+const PH=[{n:"Walk-Run Zone 2",w:[1,2,3],c:"#06B6D4"},{n:"Extend the Run",w:[4,5,6,7],c:"#10B981"},{n:"Zone 2 Solid",w:[8,9,10,11],c:"#8B5CF6"},{n:"Race Prep",w:[12,13],c:"#F59E0B"}];
+const BADGES=[
+  {id:"first",n:"First step",d:"Latihan pertama",i:"👟"},{id:"w1",n:"Week warrior",d:"1 minggu penuh",i:"🗓️"},
+  {id:"s10",n:"10 km club",d:"Akumulasi 10 km",i:"🎯"},{id:"s25",n:"25 km club",d:"25 km",i:"🔥"},
+  {id:"s50",n:"50 km beast",d:"50 km",i:"💪"},{id:"s100",n:"Century",d:"100 km",i:"💯"},
+  {id:"s200",n:"200 km legend",d:"200 km",i:"🏆"},{id:"s300",n:"300 km elite",d:"300 km",i:"👑"},
+  {id:"streak3",n:"3-day streak",d:"3 hari berturut",i:"🔗"},{id:"streak7",n:"7-day streak",d:"7 hari berturut",i:"⛓️"},
+  {id:"longmaster",n:"Long master",d:"5 long run",i:"🏔️"},{id:"halfready",n:"HM ready",d:"18+ km sesi",i:"🎖️"},
+  {id:"z2master",n:"Z2 master",d:"30 sesi Z2",i:"❤️"},{id:"finisher",n:"Finisher!",d:"Half Marathon!",i:"🥇"},
+];
+
+function S(t,k,tm,p,z,dt,sp){return{type:t,km:k,time:tm,pace:p,zone:z,detail:dt,splits:sp||[]}}
+function SP(a,b,p,z,inst){return{a,b,p,z,inst}}
+
+const PRERUN={
+  walkrun:[["Jalan cepat","3 mnt","Naikkan suhu tubuh"],["Leg swings","30s/sisi","Ayunkan kaki depan-belakang"],["High knees","30 detik","Angkat lutut bergantian"],["Ankle circles","20s/sisi","Putar pergelangan kaki"]],
+  easy:[["Jalan cepat","3 mnt","Naikkan suhu tubuh"],["Leg swings","30s/sisi","Depan-belakang & samping"],["Hip circles","30s/sisi","Mobilitas hip flexor"],["A-skip","2×20m","Aktifkan glute & hamstring"],["Jogging pelan","2 mnt","Sebelum masuk pace target"]],
+  tempo:[["Jogging Z1","5 mnt","Build up gradual"],["Leg swings","30s/sisi","Dynamic stretch"],["High knees","30 detik","Naikkan HR ke Z2"],["Butt kicks","30 detik","Aktifkan hamstring"],["Strides","3×80m","80% effort, jog balik"],["Jogging Z2","3 mnt","Settle sebelum tempo"]],
+  long:[["Jalan cepat","5 mnt","Pelan-pelan, tidak terburu"],["Leg swings","30s/sisi","Mobilitas hip"],["Walking lunges","10 langkah","Aktifkan quads & glutes"],["Calf raises","15 kali","Siapkan betis"],["Jogging pelan","3 mnt","Biarkan tubuh adjust"]],
+  interval:[["Jogging Z1","5 mnt","Build HR perlahan"],["Dynamic stretch","3 mnt","Leg swings, hip circles, high knees"],["Strides","4×100m","60→70→80→90% effort"],["Jogging Z2","3 mnt","Atur napas"]],
+  shakeout:[["Jalan santai","2 mnt","Rileks"],["Leg swings","20s/sisi","Mobilitas dasar"]],
+  race:[["Jalan cepat","5 mnt","Di area start, 1 jam sebelum"],["Dynamic stretch","5 mnt","Full body dynamic"],["Strides","3×60m","70% effort"],["Jogging Z1","3 mnt","Sangat pelan"],["Deep breaths","1 mnt","Kamu sudah siap!"]]
+};
+const POSTRUN={
+  walkrun:[["Jalan pendinginan","5 mnt","Turunkan HR gradual"],["Hamstring stretch","30s/sisi","Tekuk badan ke lutut"],["Quad stretch","30s/sisi","Tarik kaki ke belakang"],["Calf stretch","30s/sisi","Tekan tumit ke lantai"]],
+  easy:[["Jog sangat pelan","2 mnt","Jangan stop mendadak"],["Jalan","3 mnt","HR turun <120"],["Hamstring stretch","40s/sisi","Standing/seated"],["Quad stretch","30s/sisi","Tarik ke bokong"],["Hip flexor stretch","30s/sisi","Lunge, push hip"],["Calf stretch","30s/sisi","Wall stretch"]],
+  tempo:[["Jog cooldown","5 mnt","Z3→Z1 bertahap"],["Jalan","3 mnt","Normalisasi"],["Hamstring stretch","45s/sisi","Deep stretch"],["Quad stretch","40s/sisi","Ekstra setelah tempo"],["Hip flexor","40s/sisi","Post high-effort"],["Pigeon stretch","45s/sisi","Glute opener"],["Foam rolling","5 mnt","Quads, IT band, calves"]],
+  long:[["Jog pelan","3 mnt","Turunkan pace gradual"],["Jalan","5 mnt","HR <110"],["Hamstring stretch","60s/sisi","Deep, tahan lama"],["Quad stretch","45s/sisi","Tegang post long run"],["Hip flexor","45s/sisi","Buka hip"],["Pigeon stretch","60s/sisi","Glute release"],["Calf stretch","45s/sisi","Full stretch"],["Foam rolling","10 mnt","Full body"],["Nutrisi","30 mnt","Protein+karbo segera"]],
+  interval:[["Jog cooldown","5 mnt","Z4→Z1 bertahap"],["Jalan","5 mnt","Normalisasi"],["Full stretch","10 mnt","Semua group 45s/sisi"],["Foam rolling","8 mnt","Area tegang"]],
+  shakeout:[["Jalan","2 mnt","Ringan"],["Light stretch","3 mnt","Jangan overstretch"]],
+  race:[["JALAN TERUS","-","Jangan berhenti mendadak!"],["Jalan pendinginan","10 mnt","Terima medali!"],["Hidrasi","segera","Minum air/isotonic"],["Nutrisi","30 mnt","Protein+karbo"],["Gentle stretch","10 mnt","Ringan saja"],["CELEBRATE!","∞","Kamu finisher! 🎉🏅"]]
+};
+
+const SCH={};
+SCH[1]=[
+  S("rest",0,0,"-","-","Pemulihan aktif. Jalan santai 20 menit atau stretching ringan."),
+  S("walkrun",4,40,"10:00","Z2","Lari 3 mnt → jalan 2 mnt. HR >139 = jalan.",[SP(0,1,"10:00","Z2","Walk-run: lari 3 mnt, jalan 2 mnt"),SP(1,2,"10:00","Z2","Ulangi pola. HR >139 = perpanjang jalan"),SP(2,3,"10:00","Z2","Talk test: harus bisa bicara"),SP(3,4,"10:00","Z2","Finish. Turunkan pace 500m terakhir")]),
+  S("cross",0,30,"-","-","Strength: squat 3×15, lunges 3×12, plank 3×30s, calf raise 3×20."),
+  S("walkrun",4.5,42,"9:20","Z2","Lari 4 mnt → jalan 1.5 mnt. Fokus napas perut.",[SP(0,1.5,"9:30","Z2","Lari 4 mnt, jalan 1.5 mnt"),SP(1.5,3,"9:20","Z2","HR stabil 125-135 bpm"),SP(3,4.5,"9:10","Z2","Push sedikit jika HR <135")]),
+  S("rest",0,0,"-","-","Istirahat penuh. Tidur 7-8 jam."),
+  S("long",7,70,"10:00","Z2","Walk-run. Rute: Citarum → MT Haryono.",[SP(0,1,"10:30","Z1-2","Mulai sangat pelan"),SP(1,2,"10:00","Z2","Settle walk-run"),SP(2,3,"10:00","Z2","Jaga HR ≤135"),SP(3,4,"10:00","Z2","💧 Minum!"),SP(4,5,"10:00","Z2","Setengah lebih"),SP(5,6,"10:00","Z2","Kaki berat = normal"),SP(6,7,"10:30","Z1-2","Cooldown. Selamat! 🎉")]),
+  S("rest",0,0,"-","-","Recovery walk 25 mnt. Foam rolling.")
+];
+SCH[2]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("walkrun",5,45,"9:00","Z2","Lari 5 mnt → jalan 1 mnt.",[SP(0,1.5,"9:00","Z2","Lari 5, jalan 1. Napas nyaman"),SP(1.5,3,"9:00","Z2","Talk test!"),SP(3,4,"9:00","Z2","💧 Sip air"),SP(4,5,"9:00","Z2","Finish!")]),S("cross",0,30,"-","-","Core: plank 4×30s, dead bug 3×10, glute bridge 3×15."),S("walkrun",5,45,"9:00","Z2","Talk test harus lulus.",[SP(0,1.5,"9:00","Z2","Walk-run familiar"),SP(1.5,3,"9:00","Z2","Mid check: HR, napas, form"),SP(3,5,"9:00","Z2","Pertahankan! 💪")]),S("rest",0,0,"-","-","Istirahat. Protein 1.4-1.6g/kgBB."),S("long",8,72,"9:00","Z2","Rute: Citarum → Rejomulyo → Halmahera.",[SP(0,1,"9:30","Z1-2","Start pelan"),SP(1,2,"9:00","Z2","Settle"),SP(2,3,"9:00","Z2","Lewati Taman Rejomulyo"),SP(3,4,"9:00","Z2","💧 Minum!"),SP(4,5.5,"9:00","Z2","Halfway! Kamu bisa!"),SP(5.5,7,"9:00","Z2","Area Halmahera"),SP(7,8,"9:30","Z1-2","Cooldown 🎉")]),S("rest",0,0,"-","-","Recovery 25 mnt.")];
+SCH[3]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",5,40,"8:00","Z2","Coba non-stop! Target 30+ mnt tanpa jalan.",[SP(0,1,"8:30","Z2","Non-stop target. Pace santai"),SP(1,2.5,"8:00","Z2","HR 125-135. >139 = pelankan"),SP(2.5,4,"8:00","Z2","Pertahankan!"),SP(4,5,"8:00","Z2","Non-stop = milestone 🎉")]),S("cross",0,35,"-","-","Single leg deadlift 3×10, wall sit 3×45s."),S("easy",6,48,"8:00","Z2","Non-stop 40+ mnt = on track!",[SP(0,1.5,"8:15","Z2","Build up"),SP(1.5,3,"8:00","Z2","Cruise control"),SP(3,4.5,"8:00","Z2","💧 Pertahankan form"),SP(4.5,6,"7:50","Z2","Strong finish!")]),S("rest",0,0,"-","-","Istirahat penuh."),S("long",9,76,"8:30","Z2","Long run terpanjang Phase 1!",[SP(0,1.5,"9:00","Z1-2","Fokus durasi bukan speed"),SP(1.5,3,"8:30","Z2","Walk hanya jika HR >139"),SP(3,4.5,"8:30","Z2","💧 Minum!"),SP(4.5,6,"8:30","Z2","Halfway. All good?"),SP(6,7.5,"8:30","Z2","💧 Gel/pisang"),SP(7.5,9,"9:00","Z1-2","Selesai Phase 1! 🏆")]),S("rest",0,0,"-","-","Recovery + foam rolling.")];
+SCH[4]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",6,45,"7:30","Z2","Non-stop. Z2 makin natural.",[SP(0,2,"7:45","Z2","Pace naik vs minggu lalu!"),SP(2,4,"7:30","Z2","HR lebih rendah = progres"),SP(4,6,"7:20","Z2","Finish! Push jika HR <135")]),S("cross",0,35,"-","-","Squat 4×12, lunges 3×12, step-ups 3×10."),S("easy",7,49,"7:00","Z2","Catat pace/km untuk tracking.",[SP(0,2,"7:15","Z2","Catat pace baseline"),SP(2,4,"7:00","Z2","Reference pace"),SP(4,5.5,"7:00","Z2","💧 Steady"),SP(5.5,7,"6:50","Z2","Pace naik, HR sama!")]),S("rest",0,0,"-","-","Istirahat penuh."),S("long",11,82,"7:30","Z2","11 km! Citarum → Halmahera → Sidodadi.",[SP(0,2,"8:00","Z1-2","Start pelan, jarak baru"),SP(2,4,"7:30","Z2","Settle"),SP(4,5.5,"7:30","Z2","💧 Gel + minum"),SP(5.5,7,"7:30","Z2","Stay strong"),SP(7,9,"7:30","Z2","💧 Minum. 2 km lagi!"),SP(9,11,"7:45","Z1-2","Cooldown 🎉")]),S("rest",0,0,"-","-","Recovery 30 mnt.")];
+SCH[5]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",7,49,"7:00","Z2","Bandingkan HR vs pace W1!",[SP(0,2,"7:15","Z2","Cek watch: pace W1 vs now?"),SP(2,5,"7:00","Z2","HR 10-15 bpm lebih rendah!"),SP(5,7,"6:50","Z2","Progres nyata! 📈")]),S("tempo",5,30,"6:00","Z3","Tempo pertama! WU→15 mnt Z3→CD.",[SP(0,1.5,"7:00","Z2","WARM-UP jogging"),SP(1.5,4,"6:00","Z3","⚡ TEMPO! 139-155 bpm. Terkontrol!"),SP(4,5,"7:30","Z1","COOLDOWN")]),S("easy",7,49,"7:00","Z2","Recovery dari tempo. Santai.",[SP(0,2.5,"7:15","Z2","Kaki berat = normal"),SP(2.5,5,"7:00","Z2","Recovery priority"),SP(5,7,"7:00","Z2","Easy finish")]),S("rest",0,0,"-","-","Istirahat."),S("long",12,84,"7:00","Z2","12 km simulasi HM pace.",[SP(0,2,"7:30","Z1-2","Start santai"),SP(2,4,"7:00","Z2","Build ke target"),SP(4,6,"7:00","Z2","💧 Gel + minum. Halfway!"),SP(6,8,"7:00","Z2","Jaga form: bahu rileks"),SP(8,10,"7:00","Z2","💧 Minum. 2 km!"),SP(10,12,"7:15","Z1-2","Cooldown. PB jarak! 🏆")]),S("rest",0,0,"-","-","Recovery + ice bath.")];
+SCH[6]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",8,54,"6:45","Z2","8 km Z2 non-stop full.",[SP(0,2,"7:00","Z2","Build up"),SP(2,4,"6:45","Z2","Form check"),SP(4,6,"6:45","Z2","💧 HR stabil"),SP(6,8,"6:40","Z2","Strong finish!")]),S("tempo",6,34,"5:40","Z3","18 mnt Z3 block.",[SP(0,1.5,"7:00","Z2","WARM-UP"),SP(1.5,4.5,"5:40","Z3","⚡ TEMPO 18 mnt! HR 145-155"),SP(4.5,6,"7:00","Z1-2","COOLDOWN")]),S("easy",7,49,"7:00","Z2","Recovery easy run.",[SP(0,3,"7:10","Z2","Berat = recovery run"),SP(3,5,"7:00","Z2","Rileks"),SP(5,7,"7:00","Z2","Easy finish")]),S("rest",0,0,"-","-","Istirahat."),S("long",14,98,"7:00","Z2","14 km! Extended Jl. Kaligawe.",[SP(0,2,"7:30","Z1-2","Jangan terburu"),SP(2,5,"7:00","Z2","Build & settle"),SP(5,7,"7:00","Z2","💧 Gel #1. Halfway!"),SP(7,10,"7:00","Z2","Endurance builder"),SP(10,12,"7:00","Z2","💧 Gel #2. 2 km!"),SP(12,14,"7:15","Z1-2","PB! 🔥")]),S("rest",0,0,"-","-","Recovery penuh.")];
+SCH[7]=[S("rest",0,0,"-","-","DELOAD WEEK. Volume -30%."),S("easy",5,35,"7:00","Z2","Ringan. Nikmati deload.",[SP(0,2,"7:00","Z2","Santai"),SP(2,4,"7:00","Z2","Adaptasi bekerja"),SP(4,5,"7:00","Z2","Done")]),S("cross",0,25,"-","-","Mobility, yoga, foam rolling."),S("easy",5,35,"7:00","Z2","Jangan push.",[SP(0,2.5,"7:00","Z2","Rileks"),SP(2.5,5,"7:00","Z2","Finish")]),S("rest",0,0,"-","-","Istirahat."),S("long",10,70,"7:00","Z2","Deload long 10 km.",[SP(0,2,"7:15","Z1-2","Start santai"),SP(2,5,"7:00","Z2","Cruise"),SP(5,8,"7:00","Z2","💧 Minum"),SP(8,10,"7:15","Z1-2","Cooldown")]),S("rest",0,0,"-","-","Recovery penuh.")];
+SCH[8]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",8,52,"6:30","Z2","Post-deload. Z2 JAUH lebih mudah!",[SP(0,3,"6:45","Z2","Kaki segar, HR rendah"),SP(3,6,"6:30","Z2","Bandingkan W1!"),SP(6,8,"6:20","Z2","Strong 💪")]),S("tempo",7,39,"5:35","Z3","20 mnt Z3 sustained.",[SP(0,1.5,"7:00","Z2","WARM-UP"),SP(1.5,5,"5:35","Z3","⚡ TEMPO 20 mnt! HR 145-155"),SP(5,7,"7:00","Z1-2","COOLDOWN")]),S("easy",8,52,"6:30","Z2","Volume naik pasca deload.",[SP(0,3,"6:45","Z2","Recovery pace"),SP(3,6,"6:30","Z2","Steady"),SP(6,8,"6:30","Z2","Finish")]),S("rest",0,0,"-","-","Istirahat."),S("long",15,98,"6:30","Z2","15 km!",[SP(0,3,"7:00","Z1-2","Start pelan"),SP(3,6,"6:30","Z2","Settle"),SP(6,8,"6:30","Z2","💧 Gel #1"),SP(8,11,"6:30","Z2","Mental strength"),SP(11,13,"6:30","Z2","💧 Gel #2. Almost!"),SP(13,15,"6:45","Z1-2","Done! 🏆")]),S("rest",0,0,"-","-","Recovery penuh.")];
+SCH[9]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",8,50,"6:15","Z2","Z2 = comfort zone!",[SP(0,3,"6:30","Z2","Cruise"),SP(3,6,"6:15","Z2","Aerobic beast"),SP(6,8,"6:10","Z2","Strong finish")]),S("interval",6,40,"varied","Z3-4","5×(3 mnt Z4 + 2 mnt jog).",[SP(0,1.5,"7:00","Z2","WARM-UP"),SP(1.5,2,"5:00","Z4","🔥 REP 1"),SP(2,2.3,"8:00","Z1","Jog"),SP(2.3,2.8,"5:00","Z4","🔥 REP 2"),SP(2.8,3.1,"8:00","Z1","Jog"),SP(3.1,3.6,"5:00","Z4","🔥 REP 3"),SP(3.6,3.9,"8:00","Z1","Jog"),SP(3.9,4.4,"5:00","Z4","🔥 REP 4"),SP(4.4,4.7,"8:00","Z1","Jog"),SP(4.7,5.2,"5:00","Z4","🔥 REP 5. ALL IN!"),SP(5.2,6,"7:30","Z1","COOLDOWN")]),S("easy",8,50,"6:15","Z2","Recovery dari interval.",[SP(0,3,"6:30","Z2","Santai"),SP(3,6,"6:15","Z2","Rileks"),SP(6,8,"6:15","Z2","Easy finish")]),S("rest",0,0,"-","-","Istirahat."),S("long",16,100,"6:15","Z2","16 km! Test fueling.",[SP(0,3,"6:45","Z1-2","Start pelan"),SP(3,6,"6:15","Z2","Settle"),SP(6,8,"6:15","Z2","💧 Gel #1. Test brand!"),SP(8,11,"6:15","Z2","Territory baru"),SP(11,13,"6:15","Z2","💧 Gel #2. 3 km!"),SP(13,16,"6:30","Z1-2","Done! 16 km! 💪")]),S("rest",0,0,"-","-","Recovery penuh.")];
+SCH[10]=[S("rest",0,0,"-","-","Pemulihan aktif."),S("easy",9,54,"6:00","Z2","9 km — volume tertinggi!",[SP(0,3,"6:15","Z2","Build"),SP(3,6,"6:00","Z2","Peak easy pace"),SP(6,9,"5:55","Z2","9 km normal! 🔥")]),S("tempo",8,44,"5:30","Z3","Tempo terpanjang! 25 mnt Z3.",[SP(0,1.5,"7:00","Z2","WARM-UP"),SP(1.5,6,"5:30","Z3","⚡ 25 mnt! Longest!"),SP(6,8,"7:00","Z1-2","COOLDOWN")]),S("easy",8,48,"6:00","Z2","Recovery run.",[SP(0,3,"6:15","Z2","Recovery"),SP(3,6,"6:00","Z2","Steady"),SP(6,8,"6:00","Z2","Finish")]),S("rest",0,0,"-","-","Istirahat."),S("long",18,108,"6:00","Z2","18 KM! TERPANJANG! 🏔️",[SP(0,3,"6:30","Z1-2","SANGAT pelan"),SP(3,6,"6:00","Z2","Race day ritme"),SP(6,9,"6:00","Z2","💧 Gel #1"),SP(9,12,"6:00","Z2","💧 Gel #2. Halfway!"),SP(12,15,"6:00","Z2","💧 Gel #3. Mental game!"),SP(15,18,"6:15","Z1-2","18 KM DONE! 🏆🔥")]),S("rest",0,0,"-","-","Celebrate! 18 km!")];
+SCH[11]=[S("rest",0,0,"-","-","DELOAD WEEK."),S("easy",6,36,"6:00","Z2","Deload run.",[SP(0,3,"6:00","Z2","Santai"),SP(3,6,"6:00","Z2","Enjoy")]),S("cross",0,25,"-","-","Mobility & yoga."),S("easy",6,36,"6:00","Z2","Easy santai.",[SP(0,3,"6:00","Z2","Ringan"),SP(3,6,"6:00","Z2","Easy")]),S("rest",0,0,"-","-","Istirahat."),S("long",12,72,"6:00","Z2","Deload 12 km.",[SP(0,3,"6:15","Z1-2","Start santai"),SP(3,6,"6:00","Z2","12 ringan stlh 18!"),SP(6,9,"6:00","Z2","💧 Minum"),SP(9,12,"6:15","Z1-2","Cooldown")]),S("rest",0,0,"-","-","Recovery penuh.")];
+SCH[12]=[S("rest",0,0,"-","-","Tapering dimulai."),S("easy",8,46,"5:45","Z2","Lihat progres dari W1!",[SP(0,3,"6:00","Z2","W1: 10:00/km. Now: 5:45!"),SP(3,6,"5:45","Z2","MASSIVE progress"),SP(6,8,"5:40","Z2","Strong! 💪")]),S("tempo",6,32,"5:20","Z3","Race pace simulation.",[SP(0,1.5,"6:30","Z2","WARM-UP"),SP(1.5,4.5,"5:20","Z3","⚡ RACE PACE!"),SP(4.5,6,"6:30","Z1-2","COOLDOWN")]),S("easy",6,35,"5:50","Z2","Kaki harus segar.",[SP(0,3,"5:55","Z2","Taper magic"),SP(3,6,"5:50","Z2","Save for dress rehearsal!")]),S("rest",0,0,"-","-","Istirahat."),S("long",19,110,"5:50","Z2","DRESS REHEARSAL 19 km!",[SP(0,3,"6:10","Z1-2","Start persis race plan"),SP(3,6,"5:50","Z2","Build"),SP(6,9,"5:50","Z2","💧 Gel #1"),SP(9,12,"5:50","Z2","💧 Gel #2. Simulasi!"),SP(12,15,"5:50","Z2","💧 Gel #3"),SP(15,17,"5:45","Z2-3","Push sedikit Z3"),SP(17,19,"5:40","Z2-3","SIAP RACE! 🏁")]),S("rest",0,0,"-","-","Recovery total. Sleep 9 jam.")];
+SCH[13]=[S("rest",0,0,"-","-","RACE WEEK!"),S("easy",4,24,"6:00","Z2","Sangat ringan.",[SP(0,2,"6:00","Z2","Jaga kaki aktif"),SP(2,4,"6:00","Z2","Done")]),S("rest",0,0,"-","-","Visualisasi race."),S("shakeout",3,18,"6:00","Z1-2","Shakeout terakhir.",[SP(0,1.5,"6:15","Z1","Sangat pelan"),SP(1.5,3,"6:00","Z1-2","Done. Rest besok")]),S("rest",0,0,"-","-","Cek perlengkapan. Tidur 21.00."),S("rest",0,0,"-","-","RACE EVE. Carbo load. Tidur awal."),S("race",21.1,120,"5:40","Z2→Z3","HALF MARATHON! 🏁",[SP(0,3,"6:00","Z2","START PELAN! Z2 ONLY!"),SP(3,5,"5:50","Z2","Settle. HR 125-135"),SP(5,7,"5:45","Z2","💧 Gel #1 @ km 6"),SP(7,10,"5:40","Z2","Cruise. Trained for this!"),SP(10,12,"5:40","Z2","💧 Gel #2. HALFWAY! 🎉"),SP(12,15,"5:40","Z2","Mental game!"),SP(15,17,"5:35","Z2-3","💧 Gel #3. 4 km! PUSH!"),SP(17,19,"5:30","Z3","2 KM LAGI! KAMU KUAT!"),SP(19,21.1,"5:20","Z3","FINISH LINE!! 🏁🏅")])];
+
+let state={week:1,tab:"plan",completed:{},stats:{},analyses:{},apiKey:""};
+try{
+  const s=localStorage.getItem("hm-state-v3");
+  if(s){const p=JSON.parse(s);Object.assign(state,p)}
+}catch{}
+function save(){try{localStorage.setItem("hm-state-v3",JSON.stringify(state))}catch{}}
+
+function getPhase(w){return PH.find(p=>p.w.includes(w))}
+function getCompKm(){return Object.keys(state.completed).reduce((a,k)=>{const[w,d]=k.split("-").map(Number);return a+(SCH[w]?.[d]?.km||0)},0)}
+function getCompCount(){return Object.keys(state.completed).length}
+
+function getEarned(){
+  const b=[],ck=getCompKm(),cc=getCompCount();
+  if(cc>=1)b.push("first");
+  [10,25,50,100,200,300].forEach((v,i)=>{if(ck>=v)b.push("s"+v)});
+  for(let w=1;w<=13;w++){if(SCH[w].every((s,i)=>s.type==="rest"||state.completed[w+"-"+i])){b.push("w1");break}}
+  let longs=0,z2s=0;
+  Object.keys(state.completed).forEach(k=>{const[w,d]=k.split("-").map(Number);const s=SCH[w]?.[d];if(s?.type==="long")longs++;if(s?.zone?.includes("Z2"))z2s++});
+  if(longs>=5)b.push("longmaster");if(z2s>=30)b.push("z2master");
+  if(state.completed["10-5"]||state.completed["12-5"])b.push("halfready");
+  if(state.completed["13-6"])b.push("finisher");
+  let mx=0,c=0;
+  for(let w=1;w<=13;w++)for(let d=0;d<7;d++){const s=SCH[w]?.[d];if(state.completed[w+"-"+d]||s?.type==="rest")c++;else c=0;if(c>mx)mx=c}
+  if(mx>=3)b.push("streak3");if(mx>=7)b.push("streak7");
+  return[...new Set(b)];
+}
+let prevBadges=getEarned();
+
+function showToast(badge){
+  const c=document.getElementById("toast-container");
+  c.innerHTML=`<div class="toast"><div class="toast-inner"><span style="font-size:36px">${badge.i}</span><div><div style="font-size:10px;color:#F59E0B;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Achievement unlocked!</div><div style="font-size:15px;font-weight:500;margin-top:2px">${badge.n}</div><div style="font-size:12px;color:var(--tx2)">${badge.d}</div></div></div></div>`;
+  setTimeout(()=>c.innerHTML="",3500);
+}
+
+function checkBadges(){
+  const earned=getEarned();
+  const nw=earned.filter(b=>!prevBadges.includes(b));
+  if(nw.length)showToast(BADGES.find(b=>b.id===nw[0]));
+  prevBadges=earned;
+}
+
+function render(){
+  const app=document.getElementById("app");
+  const w=state.week,days=SCH[w],phase=getPhase(w);
+  const dtr=Math.max(0,Math.ceil((RD-new Date())/864e5));
+  const ck=getCompKm(),cc=getCompCount(),earned=getEarned();
+  const wkKm=days.reduce((a,d)=>a+d.km,0);
+  const wkDone=days.filter((d,i)=>d.type==="rest"||state.completed[w+"-"+i]).length;
+
+  let html=`<div class="tabs">${[["plan","Latihan"],["badges","Achievement"],["stats","Statistik"]].map(([k,l])=>`<button class="tab ${state.tab===k?"on":""}" onclick="setTab('${k}')">${l}</button>`).join("")}</div>`;
+
+  if(state.tab==="badges"){
+    html+=`<div style="text-align:center;margin-bottom:20px"><div style="font-size:36px;margin-bottom:4px">🏅</div><div style="font-size:20px;font-weight:500">${earned.length} / ${BADGES.length}</div><div style="font-size:13px;color:var(--tx3)">achievement terbuka</div></div>`;
+    html+=`<div class="badge-grid">${BADGES.map(b=>{const ok=earned.includes(b.id);return`<div class="badge ${ok?"on":"off"}"><div class="icon">${b.i}</div><div style="font-size:12px;font-weight:500">${b.n}</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">${b.d}</div>${ok?'<div style="font-size:10px;color:#F59E0B;font-weight:600;margin-top:6px">UNLOCKED</div>':''}</div>`}).join("")}</div>`;
+  } else if(state.tab==="stats"){
+    html+=`<div class="stat-grid">${[[Math.round(ck),"km total","#10B981"],[cc,"sesi selesai","#8B5CF6"],[dtr,"hari ke race","#F59E0B"],[earned.length,"badges","#EC4899"]].map(([v,l,c])=>`<div class="stat-card"><div class="num" style="color:${c}">${v}</div><div class="lbl">${l}</div></div>`).join("")}</div>`;
+    html+=`<div class="card"><div style="font-size:13px;font-weight:500;margin-bottom:12px">Volume per minggu (km)</div><div class="vol-chart">${Array.from({length:13},(_,i)=>{const wk=i+1,vol=SCH[wk].reduce((a,d)=>a+d.km,0),dv=SCH[wk].reduce((a,d,idx)=>a+(state.completed[wk+"-"+idx]?d.km:0),0),p=getPhase(wk);return`<div class="vol-bar"><div class="vol-bg" style="height:${(vol/55)*80}px"><div class="vol-fill" style="height:${vol?((dv/vol)*100):0}%;background:${p.c}"></div></div><span style="font-size:10px;color:${wk===w?"var(--tx)":"var(--tx3)"};font-weight:${wk===w?600:400}">${wk}</span></div>`}).join("")}</div></div>`;
+    html+=`<div class="card"><div style="font-size:13px;font-weight:500;margin-bottom:8px">Progres Zone 2 pace</div><div style="display:flex;gap:8px">${[["W1","10:00","#06B6D4"],["W4","7:30","#10B981"],["W8","6:30","#8B5CF6"],["W12","5:45","#F59E0B"]].map(([w,p,c])=>`<div style="flex:1;text-align:center;padding:10px 6px;background:${c}15;border-radius:10px"><div style="font-size:10px;color:${c};font-weight:500">${w}</div><div style="font-size:14px;font-weight:500;margin-top:4px">${p}</div><div style="font-size:10px;color:var(--tx3)">/km</div></div>`).join("")}</div></div>`;
+    // API Key setting
+    html+=`<div class="card"><div style="font-size:13px;font-weight:500;margin-bottom:8px">🔑 API Key (untuk AI Analysis)</div><div style="font-size:11px;color:var(--tx2);margin-bottom:8px;line-height:1.5">Masukkan Anthropic API key untuk fitur AI Coach. Dapatkan di console.anthropic.com</div><div class="field"><input type="password" placeholder="sk-ant-..." value="${state.apiKey||""}" oninput="state.apiKey=this.value;save()" style="font-size:13px"></div></div>`;
+  } else {
+    // Plan tab
+    html+=`<div class="card hero"><div><div class="hero-num">${dtr}</div><div class="hero-sub">hari menuju race day</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:500">🏁 Half Marathon</div><div style="font-size:12px;color:var(--tx2)">28 Sep 2026</div><div style="font-size:12px;color:#10B981;font-weight:500;margin-top:2px">${Math.round(ck)} / ~350 km</div></div></div>`;
+    html+=`<div class="phase-bar">${PH.map(p=>`<div class="phase-seg" style="flex:${p.w.length};background:${p.w.includes(w)?p.c:p.c+'30'}"></div>`).join("")}</div>`;
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:12px;font-weight:500;color:${phase.c}">${phase.n}</span><span style="font-size:12px;color:var(--tx3)">Minggu ${w} / 13</span></div>`;
+    html+=`<div class="wk-scroll">${Array.from({length:13},(_,i)=>{const wk=i+1,ad=SCH[wk].every((s,idx)=>s.type==="rest"||state.completed[wk+"-"+idx]),p=getPhase(wk);return`<button class="wk-btn ${wk===w?"on":""}" style="border-color:${wk===w?p.c:"var(--bd)"};color:${wk===w||ad?p.c:"var(--tx2)"};${ad&&wk!==w?`background:${p.c}20`:""}" onclick="setWeek(${wk})">${wk}${ad?"<span style='font-size:8px'>✓</span>":""}</button>`}).join("")}</div>`;
+    html+=`<div class="card" style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:15px;font-weight:500">Minggu ${w}</div><div style="font-size:12px;color:var(--tx2);margin-top:2px">${wkKm} km · ${wkDone}/7 selesai</div></div><div class="ring"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="var(--s0)" stroke-width="4"/><circle cx="24" cy="24" r="20" fill="none" stroke="${phase.c}" stroke-width="4" stroke-dasharray="${(wkDone/7)*126} 126" stroke-linecap="round" transform="rotate(-90 24 24)"/></svg><span>${Math.round((wkDone/7)*100)}%</span></div></div>`;
+    html+=days.map((ses,idx)=>{
+      const k=w+"-"+idx,done=!!state.completed[k],t=TS[ses.type],isR=ses.type==="rest",hasAI=!!state.analyses[k];
+      return`<div class="day ${done?"done":""}" onclick="openDay(${idx})"><div class="chk ${done?"on":""} ${isR?"rest":""}" style="${done?`background:${t.a}`:""}" onclick="event.stopPropagation();${isR?"":"toggleDone("+w+","+idx+")"}">${done?'<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-5" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':""}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:var(--tx3);min-width:28px">${DN[idx]}</span><span style="font-size:15px">${t.i}</span><span style="font-size:13px;font-weight:500;color:${done?"var(--tx2)":t.a}">${t.l}</span></div>${ses.km>0?`<div style="display:flex;gap:12px;font-size:12px;color:var(--tx2);margin-top:2px"><span style="font-weight:500">${ses.km} km</span><span>${ses.time} mnt</span><span>${ses.pace}/km</span><span style="font-size:10px;font-weight:500;padding:1px 6px;border-radius:6px;background:${(ZD[ses.zone?.substring(0,2)]||ZD.Z2).c}20;color:${(ZD[ses.zone?.substring(0,2)]||ZD.Z2).c}">${ses.zone}</span></div>`:""}</div><div style="display:flex;align-items:center;gap:4px;flex-shrink:0">${hasAI?`<span style="font-size:9px;font-weight:600;padding:2px 5px;border-radius:6px;background:${t.a}15;color:${t.a}">AI</span>`:""}<svg width="16" height="16" viewBox="0 0 16 16" style="opacity:.3"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>`
+    }).join("");
+  }
+  app.innerHTML=html;
+}
+
+function setTab(t){state.tab=t;save();render()}
+function setWeek(w){state.week=w;save();render()}
+function toggleDone(w,d){const k=w+"-"+d;state.completed[k]?delete state.completed[k]:state.completed[k]=Date.now();save();checkBadges();render()}
+
+function openDay(idx){
+  const w=state.week,ses=SCH[w][idx],t=TS[ses.type],k=w+"-"+idx;
+  const done=!!state.completed[k],an=state.analyses[k],st=state.stats[k];
+  const pre=PRERUN[ses.type]||[],post=POSTRUN[ses.type]||[];
+  const sheet=document.getElementById("sheet");
+
+  let h=`<div class="sheet-handle"><div></div></div>`;
+  // Header
+  h+=`<div class="sheet-head" style="background:${t.g}"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:11px;color:${t.d};opacity:.7;font-weight:500">Minggu ${w} · ${DF[idx]}</div><div style="font-size:22px;font-weight:500;color:${t.d};margin-top:4px;display:flex;align-items:center;gap:8px"><span style="font-size:28px">${t.i}</span>${t.l}</div></div><button onclick="closeSheet()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.5);cursor:pointer;font-size:16px;color:${t.d};display:flex;align-items:center;justify-content:center">×</button></div>`;
+  if(ses.km>0){
+    h+=`<div style="display:flex;gap:16px;margin-top:16px">${[["Jarak",ses.km+" km"],["Waktu",ses.time+"'"],["Pace",ses.pace+"/km"],["Zone",ses.zone]].map(([l,v])=>`<div><div style="font-size:10px;color:${t.d};opacity:.6;text-transform:uppercase;letter-spacing:.05em">${l}</div><div style="font-size:16px;font-weight:500;color:${t.d};margin-top:2px">${v}</div></div>`).join("")}</div>`;
+  }
+  h+=`</div>`;
+
+  // HR Zone bar
+  if(ses.zone&&ses.zone!=="-"){
+    h+=`<div style="margin:0 16px 16px;padding:14px 16px;background:var(--s2);border-radius:12px;border:.5px solid var(--bd)"><div style="font-size:12px;color:var(--tx3);margin-bottom:10px;font-weight:500">Heart rate target</div><div class="zone-bar">${["Z1","Z2","Z3","Z4","Z5"].map(z=>`<div class="zone-seg" style="background:${ses.zone.includes(z)?ZD[z].c:"var(--s0)"};opacity:${ses.zone.includes(z)?1:.3}"></div>`).join("")}</div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx3)">${["Z1","Z2","Z3","Z4","Z5"].map(z=>`<span style="font-weight:${ses.zone.includes(z)?500:400};color:${ses.zone.includes(z)?ZD[z].c:"var(--tx3)"}">${z}</span>`).join("")}</div>`;
+    if(ses.zone.includes("Z2"))h+=`<div style="margin-top:8px;font-size:13px">Jaga HR di <strong style="color:#10B981">119–139 bpm</strong>. Jika >139, turunkan pace!</div>`;
+    if(ses.zone==="Z3")h+=`<div style="margin-top:8px;font-size:13px">Target HR <strong style="color:#FBBF24">139–158 bpm</strong>. Terkontrol!</div>`;
+    h+=`</div>`;
+  }
+
+  // Detail
+  h+=`<div style="margin:0 16px 16px;padding:14px 16px;background:var(--s2);border-radius:12px;border:.5px solid var(--bd);font-size:14px;line-height:1.7">${ses.detail}</div>`;
+
+  // Pre-run
+  if(pre.length){
+    h+=`<div style="margin:0 16px 16px"><div style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:8px">🔆 Pre-run warm-up</div><div style="background:var(--s2);border-radius:12px;border:.5px solid var(--bd);overflow:hidden">${pre.map(([n,d,desc],i)=>`<div class="prepost-item"><div class="prepost-num" style="background:${t.g};color:${t.d}">${i+1}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:500">${n}</span><span style="font-size:11px;color:${t.a};font-weight:500;background:${t.g};padding:2px 8px;border-radius:8px">${d}</span></div><div style="font-size:12px;color:var(--tx2);margin-top:2px;line-height:1.5">${desc}</div></div></div>`).join("")}</div></div>`;
+  }
+
+  // Splits
+  if(ses.splits?.length){
+    h+=`<div style="margin:0 16px 16px"><div style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:8px">📍 Breakdown per kilometer</div><div style="background:var(--s2);border-radius:12px;border:.5px solid var(--bd);overflow:hidden">${ses.splits.map((sp,i)=>{const zk=sp.z.replace(/[-→]/g,"").trim().substring(0,2);const zc=(ZD[zk]||ZD.Z2).c;return`<div class="split-row"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:${zc}"></div><span style="font-size:13px;font-weight:500">KM ${sp.a}${sp.b>sp.a?"–"+sp.b:""}</span></div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:${zc};font-weight:500;padding:2px 8px;background:${zc}15;border-radius:8px">${sp.z}</span><span style="font-size:12px;color:var(--tx2);font-weight:500">${sp.p}/km</span></div></div><div style="font-size:12px;color:var(--tx2);line-height:1.5;padding-left:16px">${sp.inst}</div></div>`}).join("")}</div></div>`;
+  }
+
+  // Post-run
+  if(post.length){
+    h+=`<div style="margin:0 16px 16px"><div style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:8px">🧊 Post-run cooldown</div><div style="background:var(--s2);border-radius:12px;border:.5px solid var(--bd);overflow:hidden">${post.map(([n,d,desc],i)=>`<div class="prepost-item"><div class="prepost-num" style="background:var(--s0);color:var(--tx2)">${i+1}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:500">${n}</span><span style="font-size:11px;color:var(--tx3);background:var(--s0);padding:2px 8px;border-radius:8px">${d}</span></div><div style="font-size:12px;color:var(--tx2);margin-top:2px;line-height:1.5">${desc}</div></div></div>`).join("")}</div></div>`;
+  }
+
+  // Stats upload & AI
+  if(ses.type!=="rest"&&ses.type!=="cross"){
+    h+=`<div style="margin:0 16px 16px" id="stats-section"><button onclick="document.getElementById('stats-expand').style.display=document.getElementById('stats-expand').style.display==='none'?'block':'none'" style="width:100%;padding:14px 16px;border-radius:12px;border:${an?"1.5px solid "+t.a+"50":".5px solid var(--bd)"};background:${an?t.a+"08":"var(--s2)"};cursor:pointer;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">📊</span><div style="text-align:left"><div style="font-size:13px;font-weight:500;color:var(--tx)">${an?"Lihat analisa AI":"Upload statistik lari"}</div>${st?`<div style="font-size:11px;color:var(--tx2);margin-top:1px">${st.avgHr?"HR "+st.avgHr:""}${st.avgPace?" · "+st.avgPace+"/km":""}${st.distance?" · "+st.distance+" km":""}</div>`:""}</div></div><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="var(--tx3)" stroke-width="1.5" stroke-linecap="round"/></svg></button>`;
+    h+=`<div id="stats-expand" style="display:none;margin-top:8px;padding:16px;border-radius:12px;background:var(--s2);border:.5px solid var(--bd)">`;
+    h+=`<div style="font-size:12px;font-weight:500;color:var(--tx2);margin-bottom:8px">Screenshot Garmin / Strava</div>`;
+    h+=`<input type="file" accept="image/*" id="img-input" onchange="handleImg(this)" style="display:none">`;
+    h+=`<button class="upload-btn" id="upload-btn" onclick="document.getElementById('img-input').click()">📷 Upload screenshot</button>`;
+    h+=`<div style="font-size:12px;font-weight:500;color:var(--tx2);margin:14px 0 8px">Atau input manual</div>`;
+    h+=`<div class="input-grid">${[["avgHr","Avg HR (bpm)","135","❤️"],["maxHr","Max HR (bpm)","155","💓"],["avgPace","Avg Pace","6:30","⏱️"],["distance","Jarak (km)","7.2","📏"]].map(([f,l,p,ic])=>`<div class="field"><label>${ic} ${l}</label><input id="f-${f}" type="text" placeholder="${p}" value="${st?.[f]||""}"></div>`).join("")}</div>`;
+    h+=`<div class="field" style="margin-bottom:14px"><label>📝 Catatan</label><textarea id="f-notes" rows="2" placeholder="Kaki berat di km 5, HR drift...">${st?.notes||""}</textarea></div>`;
+    h+=`<button class="btn-ai" id="ai-btn" style="background:linear-gradient(135deg,${t.a},${t.d})" onclick="runAI(${w},${idx})"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1v6M8 15v-4M1 8h4M15 8h-4M3.5 3.5l2 2M12.5 12.5l-2-2M3.5 12.5l2-2M12.5 3.5l-2 2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg> Analisa dengan AI</button>`;
+    if(an){
+      h+=`<div class="analysis-box" style="background:linear-gradient(135deg,${t.a}08,${t.a}15);border:1px solid ${t.a}30"><div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1v6M8 15v-4M1 8h4M15 8h-4M3.5 3.5l2 2M12.5 12.5l-2-2M3.5 12.5l2-2M12.5 3.5l-2 2" stroke="${t.a}" stroke-width="1.5" stroke-linecap="round"/></svg><span style="font-size:12px;font-weight:600;color:${t.a};text-transform:uppercase;letter-spacing:.05em">AI Coach Analysis</span></div><div style="color:var(--tx)">${an.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:'+t.d+'">$1</strong>').replace(/\n/g,"<br>")}</div>${st?.timestamp?`<div style="font-size:10px;color:var(--tx3);margin-top:10px;text-align:right">Dianalisa ${new Date(st.timestamp).toLocaleDateString("id-ID",{day:"numeric",month:"short"})}</div>`:""}<button class="btn-ai" style="margin-top:10px;background:transparent;border:.5px solid ${t.a}40;color:${t.a};font-size:12px;padding:10px" onclick="runAI(${w},${idx})">🔄 Analisa ulang</button></div>`;
+    }
+    h+=`</div></div>`;
+  }
+
+  // Complete button
+  if(ses.type!=="rest"){
+    h+=`<div style="padding:0 16px 32px"><button class="btn-done" style="background:${done?"var(--s0)":t.a};color:${done?"var(--tx2)":"white"}" onclick="toggleDone(${w},${idx});closeSheet()">${done?"Tandai belum selesai":"Selesai "+t.l+"!"}</button></div>`;
+  }
+
+  sheet.innerHTML=h;
+  requestAnimationFrame(()=>{
+    document.getElementById("overlay").classList.add("show");
+    sheet.classList.add("show");
+  });
+}
+
+function closeSheet(){
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("sheet").classList.remove("show");
+  setTimeout(render,200);
+}
+
+let uploadedImg=null;
+function handleImg(input){
+  const f=input.files?.[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    uploadedImg={data:e.target.result.split(",")[1],type:f.type,name:f.name};
+    const btn=document.getElementById("upload-btn");
+    btn.className="upload-btn has";
+    btn.innerHTML="✅ "+f.name.substring(0,30);
+  };
+  r.readAsDataURL(f);
+}
+
+async function runAI(w,idx){
+  const ses=SCH[w][idx],t=TS[ses.type],k=w+"-"+idx;
+  const btn=document.getElementById("ai-btn");
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> AI sedang menganalisa...';
+
+  const stats={avgHr:document.getElementById("f-avgHr")?.value||"",maxHr:document.getElementById("f-maxHr")?.value||"",avgPace:document.getElementById("f-avgPace")?.value||"",distance:document.getElementById("f-distance")?.value||"",notes:document.getElementById("f-notes")?.value||""};
+
+  const prompt=`KONTEKS: Pelari 22 thn, MHR 198. Minggu ${w}/13 HM training. ${DF[idx]} - ${t.l}. Target: ${ses.km}km, ${ses.time}mnt, pace ${ses.pace}/km, zona ${ses.zone}. Z2=119-139bpm.
+DATA AKTUAL: ${stats.avgHr?"Avg HR:"+stats.avgHr:""}${stats.maxHr?" Max HR:"+stats.maxHr:""} ${stats.avgPace?"Pace:"+stats.avgPace+"/km":""}${stats.distance?" Jarak:"+stats.distance+"km":""} ${stats.notes?"Catatan:"+stats.notes:""}
+TUGAS: Analisa sebagai running coach. Bahasa Indonesia, maks 200 kata:
+1. **VERDICT**: Berhasil/perlu perbaikan?
+2. **HR ANALYSIS**: Sudah di zona target?
+3. **PACE ANALYSIS**: Aerobic base berkembang?
+4. **TIPS**: 2-3 saran spesifik.
+5. **SCORE**: 1-10.
+Supportive tapi jujur. Pakai emoji.`;
+
+  const content=[];
+  if(uploadedImg){
+    content.push({type:"image",source:{type:"base64",media_type:uploadedImg.type,data:uploadedImg.data}});
+    content.push({type:"text",text:"Ini screenshot stats lari. Ekstrak data & analisa.\n\n"+prompt});
+  } else {
+    content.push({type:"text",text:prompt});
+  }
+
+  const apiKey=state.apiKey;
+  if(!apiKey){
+    state.analyses[k]="⚠️ API key belum diisi!\n\nMasukkan Anthropic API key di tab **Statistik** (scroll ke bawah) untuk menggunakan fitur AI Coach.\n\nDapatkan API key gratis di: console.anthropic.com";
+    state.stats[k]={...stats,timestamp:Date.now()};
+    save();openDay(idx);return;
+  }
+
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content}]})
+    });
+    const data=await res.json();
+    if(data.error){
+      state.analyses[k]="❌ Error: "+(data.error.message||"Cek API key & coba lagi.");
+    } else {
+      state.analyses[k]=data.content?.map(c=>c.text||"").join("\n")||"Tidak bisa menganalisa.";
+    }
+  }catch(err){
+    state.analyses[k]="❌ Error: "+err.message;
+  }
+  state.stats[k]={...stats,timestamp:Date.now(),hasImage:!!uploadedImg};
+  uploadedImg=null;
+  save();openDay(idx);
+}
+
+// Service worker
+if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+
+render();
+</script>
+</body>
+</html>
